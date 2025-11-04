@@ -129,10 +129,46 @@ class MyController(Controller):
         ### convert waypoint list to numpy array
         way_points = np.array(way_points)
 
-        self._t_total = 15
-        t = np.linspace(0, self._t_total, len(way_points))
-        self._des_pos_spline = CubicSpline(t, way_points)
 
+        ### Cubic spline calculations
+        ## Initial approach
+        #self._t_total = 15
+        #t = np.linspace(0, self._t_total, len(way_points))
+        #self._des_pos_spline = CubicSpline(t, way_points)
+
+        self._t_total = 25
+
+        """
+        Parametrisierung nach Streckenlänge
+        """
+        dists = np.zeros(len(way_points))
+        for i in range(1, len(way_points)):
+            dists[i] = dists[i-1] + np.linalg.norm(way_points[i] - way_points[i-1])
+        t_raw = dists.copy()
+
+        """
+        Slow down in the area around the gates
+        """
+        gate_radius = 1.0
+        slowdown_factor = 2.0
+        #for i in range(len(way_points) - 1):
+        #    segment_mid = 0.5 * (way_points[i] + way_points[i+1])
+        #    for gate_pos in gates_positions:
+        #        if np.linalg.norm(segment_mid - gate_pos) < gate_radius:
+        #            segment_len = np.linalg.norm(way_points[i+1] - way_points[i])
+        #            t_raw[i+1:] += segment_len * (slowdown_factor - 1.0)
+
+        # Edge case: all points are identical
+        if dists[-1] == 0:
+            t = np.linspace(0, self._t_total, len(way_points))
+        else:
+            t = t_raw * (self._t_total / t_raw[-1])
+
+        self._des_pos_spline = CubicSpline(t, way_points, axis = 0)
+
+        ### ================================
+
+ 
         self._tick = 0
         self._finished = False
 

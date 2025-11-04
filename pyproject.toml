@@ -3,7 +3,7 @@ requires = ["setuptools>=61.0.0", "wheel", "numpy>=2.0.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "lsy_drone_racing"
+name = "lsy_drone_racing" 
 version = "0.0.1"
 description = "LSY Autonomous Drone Racing Project Course"
 readme = "README.md"
